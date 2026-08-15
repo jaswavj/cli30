@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page language="java" import="java.util.*"%>
 <%@ page language="java" import="java.text.DecimalFormat"%>
 
@@ -54,54 +54,16 @@ if (companyDetails != null && companyDetails.size() >= 4) {
 
 DecimalFormat df = new DecimalFormat("0.00");
 
-// GST Calculation variables
+// Totals
 double totalAmount = 0;
 double totalDiscount = 0;
 double finalPaid = 0;
-double totalItemAmount = 0;
-double totalTaxableAmount = 0;
-double totalCGST = 0;
-double totalSGST = 0;
-double totalIGST = 0;
-double totalGSTAmount = 0;
 double totalQtyD = 0;
 
-// Map to store GST-wise totals
-Map<Integer, Double> gstWiseTaxable = new HashMap<Integer, Double>();
-Map<Integer, Double> gstWiseCGST = new HashMap<Integer, Double>();
-Map<Integer, Double> gstWiseSGST = new HashMap<Integer, Double>();
-Map<Integer, Double> gstWiseIGST = new HashMap<Integer, Double>();
-
 for(Vector<Object> prod : billDetails){
-    double itemTotal = Double.parseDouble(prod.get(4).toString());
-    double itemDisc = Double.parseDouble(prod.get(3).toString());
-    double itemPrice = Double.parseDouble(prod.get(2).toString());
-    int gstPer = Integer.parseInt(prod.get(5).toString());
-    double qty = Double.parseDouble(prod.get(1).toString());
-    
-    // Calculate taxable amount (amount before GST)
-    double taxableAmount = itemTotal / (1 + (gstPer / 100.0));
-    double gstAmount = itemTotal - taxableAmount;
-    double cgst = gstAmount / 2;
-    double sgst = gstAmount / 2;
-    
-    totalQtyD += qty;
-    totalAmount += itemTotal;
-    totalDiscount += itemDisc;
-    totalTaxableAmount += taxableAmount;
-    totalGSTAmount += gstAmount;
-    totalCGST += cgst;
-    totalSGST += sgst;
-    
-    // Accumulate GST-wise totals
-    if (!gstWiseTaxable.containsKey(gstPer)) {
-        gstWiseTaxable.put(gstPer, 0.0);
-        gstWiseCGST.put(gstPer, 0.0);
-        gstWiseSGST.put(gstPer, 0.0);
-    }
-    gstWiseTaxable.put(gstPer, gstWiseTaxable.get(gstPer) + taxableAmount);
-    gstWiseCGST.put(gstPer, gstWiseCGST.get(gstPer) + cgst);
-    gstWiseSGST.put(gstPer, gstWiseSGST.get(gstPer) + sgst);
+    totalAmount += Double.parseDouble(prod.get(4).toString());
+    totalDiscount += Double.parseDouble(prod.get(3).toString());
+    totalQtyD += Double.parseDouble(prod.get(1).toString());
 }
 
 double subTotalBeforeDiscount = totalAmount + totalDiscount;
@@ -267,9 +229,6 @@ finalPaid = totalAmount - extradisc;
     <div class="header center">
         <div class="company-name"><%= companyName %></div>
         <div class="small"><%= companyAddress %></div>
-        <% if (!companyGSTIN.isEmpty()) { %>
-        <div class="small">GSTIN: <%= companyGSTIN %></div>
-        <% } %>
     </div>
     
     <div class="double-divider"></div>
@@ -287,9 +246,6 @@ finalPaid = totalAmount - extradisc;
         <div>Customer: <%= customerName %></div>
         <% if (!customerPhone.equals("-")) { %>
         <div>Phone: <%= customerPhone %></div>
-        <% } %>
-        <% if (!customerGSTIN.equals("-")) { %>
-        <div>GSTIN: <%= customerGSTIN %></div>
         <% } %>
     </div>
     
@@ -310,16 +266,14 @@ finalPaid = totalAmount - extradisc;
         <%
         for(Vector<Object> prod : billDetails){
             String itemName = prod.get(0).toString();
-            double qty = Double.parseDouble(prod.get(1).toString());
             double itemPrice = Double.parseDouble(prod.get(2).toString());
             double itemDisc = Double.parseDouble(prod.get(3).toString());
             double itemTotal = Double.parseDouble(prod.get(4).toString());
-            int gstPer = Integer.parseInt(prod.get(5).toString());
         %>
         <div class="item-row">
             <div class="item-name small"><%= itemName %></div>
             <div class="info-row small">
-                <span style="width: 50%"><%= gstPer > 0 ? "GST " + gstPer + "%" : "" %></span>
+                <span style="width: 50%"></span>
                 <span style="width: 15%; text-align: center"><%= prod.get(1) %></span>
                 <span style="width: 17%; text-align: right"><%= df.format(itemPrice) %></span>
                 <span style="width: 18%; text-align: right"><%= df.format(itemTotal) %></span>
@@ -381,43 +335,7 @@ finalPaid = totalAmount - extradisc;
         <% } %>
     </div>
     
-    <% if (totalGSTAmount > 0) { %>
     <div class="double-divider"></div>
-    
-    <!-- GST Summary -->
-    <div class="gst-section">
-        <div class="bold small">GST Summary:</div>
-        <%
-        List<Integer> gstRates = new ArrayList<Integer>(gstWiseTaxable.keySet());
-        Collections.sort(gstRates);
-        for(Integer rate : gstRates) {
-            if(rate > 0) {
-        %>
-        <div class="info-row small">
-            <span>GST <%= rate %>%:</span>
-            <span>Taxable: ₹<%= df.format(gstWiseTaxable.get(rate)) %></span>
-        </div>
-        <div class="info-row small" style="margin-left: 15px;">
-            <span>CGST:</span>
-            <span>₹<%= df.format(gstWiseCGST.get(rate)) %></span>
-        </div>
-        <div class="info-row small" style="margin-left: 15px;">
-            <span>SGST:</span>
-            <span>₹<%= df.format(gstWiseSGST.get(rate)) %></span>
-        </div>
-        <%
-            }
-        }
-        %>
-        <div class="divider"></div>
-        <div class="info-row small bold">
-            <span>Total GST:</span>
-            <span>₹ <%= df.format(totalGSTAmount) %></span>
-        </div>
-    </div>
-    
-    <div class="double-divider"></div>
-    <% } %>
     
     <!-- Footer -->
     <div class="footer">

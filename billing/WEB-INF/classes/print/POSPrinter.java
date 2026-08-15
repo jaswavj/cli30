@@ -258,12 +258,6 @@ public class POSPrinter {
         pAddr.setAlignment(Element.ALIGN_CENTER);
         document.add(pAddr);
         
-        if (!companyGSTIN.isEmpty()) {
-            Paragraph pGst = new Paragraph("GSTIN: " + companyGSTIN, fontSmall);
-            pGst.setAlignment(Element.ALIGN_CENTER);
-            document.add(pGst);
-        }
-        
         addPdfDivider(document, pageWidth);
         // ===== BILL INFO =====
         String billDate = bill.getBillDate(billNo);
@@ -301,9 +295,6 @@ public class POSPrinter {
         if (!"-".equals(customerPhone) && customerPhone != null && !customerPhone.isEmpty()) {
             document.add(new Paragraph("Phone: " + customerPhone, fontSmall));
         }
-        if (!"-".equals(customerGSTIN) && customerGSTIN != null && !customerGSTIN.isEmpty()) {
-            document.add(new Paragraph("GSTIN: " + customerGSTIN, fontSmall));
-        }
         
         addPdfDivider(document, pageWidth);
         
@@ -322,11 +313,6 @@ public class POSPrinter {
         double extradisc = bill.getExtraDisc(billNo);
         
         double totalAmount = 0, totalDiscount = 0, totalQtyD = 0;
-        double totalTaxableAmount = 0, totalGSTAmount = 0, totalCGST = 0, totalSGST = 0;
-        
-        Map<Integer, Double> gstWiseTaxable = new HashMap<Integer, Double>();
-        Map<Integer, Double> gstWiseCGST = new HashMap<Integer, Double>();
-        Map<Integer, Double> gstWiseSGST = new HashMap<Integer, Double>();
         
         for (Vector<Object> prod : billDetails) {
             String itemName = prod.get(0).toString();
@@ -334,32 +320,12 @@ public class POSPrinter {
             double itemPrice = Double.parseDouble(prod.get(2).toString());
             double itemDisc = Double.parseDouble(prod.get(3).toString());
             double itemTotal = Double.parseDouble(prod.get(4).toString());
-            int gstPer = Integer.parseInt(prod.get(5).toString());
-            
-            double taxableAmount = itemTotal / (1 + (gstPer / 100.0));
-            double gstAmount = itemTotal - taxableAmount;
-            double cgst = gstAmount / 2;
-            double sgst = gstAmount / 2;
             
             totalQtyD += qty;
             totalAmount += itemTotal;
             totalDiscount += itemDisc;
-            totalTaxableAmount += taxableAmount;
-            totalGSTAmount += gstAmount;
-            totalCGST += cgst;
-            totalSGST += sgst;
             
-            if (!gstWiseTaxable.containsKey(gstPer)) {
-                gstWiseTaxable.put(gstPer, 0.0);
-                gstWiseCGST.put(gstPer, 0.0);
-                gstWiseSGST.put(gstPer, 0.0);
-            }
-            gstWiseTaxable.put(gstPer, gstWiseTaxable.get(gstPer) + taxableAmount);
-            gstWiseCGST.put(gstPer, gstWiseCGST.get(gstPer) + cgst);
-            gstWiseSGST.put(gstPer, gstWiseSGST.get(gstPer) + sgst);
-            
-            String displayName = gstPer > 0 ? itemName + " (" + gstPer + "%)" : itemName;
-            addPdfCell(itemTable, displayName, fontSmall, Element.ALIGN_LEFT);
+            addPdfCell(itemTable, itemName, fontSmall, Element.ALIGN_LEFT);
             addPdfCell(itemTable, prod.get(1).toString(), fontSmall, Element.ALIGN_CENTER);
             addPdfCell(itemTable, df.format(itemPrice), fontSmall, Element.ALIGN_RIGHT);
             addPdfCell(itemTable, df.format(itemTotal), fontSmall, Element.ALIGN_RIGHT);
@@ -401,23 +367,6 @@ public class POSPrinter {
         if (balance != 0) {
             String label = balance > 0 ? "Balance Due:" : "Change:";
             addPdfTotalRow(document, label, "Rs " + df.format(Math.abs(balance)), fontBold);
-        }
-        
-        // ===== GST SUMMARY =====
-        if (totalGSTAmount > 0) {
-            addPdfDivider(document, pageWidth);
-            document.add(new Paragraph("GST Summary:", fontBold));
-            
-            java.util.List<Integer> gstRates = new ArrayList<Integer>(gstWiseTaxable.keySet());
-            Collections.sort(gstRates);
-            for (Integer rate : gstRates) {
-                if (rate > 0) {
-                    addPdfTotalRow(document, "GST " + rate + "%:", "Taxable: Rs" + df.format(gstWiseTaxable.get(rate)), fontSmall);
-                    addPdfTotalRow(document, "  CGST:", "Rs" + df.format(gstWiseCGST.get(rate)), fontSmall);
-                    addPdfTotalRow(document, "  SGST:", "Rs" + df.format(gstWiseSGST.get(rate)), fontSmall);
-                }
-            }
-            addPdfTotalRow(document, "Total GST:", "Rs " + df.format(totalGSTAmount), fontBold);
         }
         
         addPdfDivider(document, pageWidth);
@@ -527,10 +476,6 @@ public class POSPrinter {
             }
         }
         
-        if (!companyGSTIN.isEmpty()) {
-            sb.append(centerText("GSTIN: " + companyGSTIN)).append("\n");
-        }
-        
         sb.append(divider());
         
         // ===== BILL INFO =====
@@ -558,9 +503,6 @@ public class POSPrinter {
         if (!"-".equals(customerPhone) && customerPhone != null && !customerPhone.isEmpty()) {
             sb.append("Ph: ").append(customerPhone).append("\n");
         }
-        if (!"-".equals(customerGSTIN) && customerGSTIN != null && !customerGSTIN.isEmpty()) {
-            sb.append("GSTIN: ").append(customerGSTIN).append("\n");
-        }
         
         sb.append(divider());
         
@@ -575,14 +517,6 @@ public class POSPrinter {
         double totalAmount = 0;
         double totalDiscount = 0;
         double totalQtyD = 0;
-        double totalTaxableAmount = 0;
-        double totalGSTAmount = 0;
-        double totalCGST = 0;
-        double totalSGST = 0;
-        
-        Map<Integer, Double> gstWiseTaxable = new HashMap<Integer, Double>();
-        Map<Integer, Double> gstWiseCGST = new HashMap<Integer, Double>();
-        Map<Integer, Double> gstWiseSGST = new HashMap<Integer, Double>();
         
         for (Vector<Object> prod : billDetails) {
             String itemName = prod.get(0).toString();
@@ -590,33 +524,13 @@ public class POSPrinter {
             double itemPrice = Double.parseDouble(prod.get(2).toString());
             double itemDisc = Double.parseDouble(prod.get(3).toString());
             double itemTotal = Double.parseDouble(prod.get(4).toString());
-            int gstPer = Integer.parseInt(prod.get(5).toString());
-            
-            // Calculations
-            double taxableAmount = itemTotal / (1 + (gstPer / 100.0));
-            double gstAmount = itemTotal - taxableAmount;
-            double cgst = gstAmount / 2;
-            double sgst = gstAmount / 2;
             
             totalQtyD += qty;
             totalAmount += itemTotal;
             totalDiscount += itemDisc;
-            totalTaxableAmount += taxableAmount;
-            totalGSTAmount += gstAmount;
-            totalCGST += cgst;
-            totalSGST += sgst;
-            
-            if (!gstWiseTaxable.containsKey(gstPer)) {
-                gstWiseTaxable.put(gstPer, 0.0);
-                gstWiseCGST.put(gstPer, 0.0);
-                gstWiseSGST.put(gstPer, 0.0);
-            }
-            gstWiseTaxable.put(gstPer, gstWiseTaxable.get(gstPer) + taxableAmount);
-            gstWiseCGST.put(gstPer, gstWiseCGST.get(gstPer) + cgst);
-            gstWiseSGST.put(gstPer, gstWiseSGST.get(gstPer) + sgst);
             
             // Print item
-            sb.append(formatItemRow(itemName, prod.get(1).toString(), df.format(itemPrice), df.format(itemTotal), gstPer));
+            sb.append(formatItemRow(itemName, prod.get(1).toString(), df.format(itemPrice), df.format(itemTotal), 0));
             if (itemDisc > 0) {
                 sb.append(padLeft("Disc: -" + df.format(itemDisc), RECEIPT_WIDTH)).append("\n");
             }
@@ -649,23 +563,6 @@ public class POSPrinter {
         if (balance != 0) {
             String label = balance > 0 ? "Balance:" : "Change:";
             sb.append(formatTotalRow(label, "Rs " + df.format(Math.abs(balance))));
-        }
-        
-        // ===== GST SUMMARY (compact) =====
-        if (totalGSTAmount > 0) {
-            sb.append(divider());
-            sb.append("GST Summary:\n");
-            
-            java.util.List<Integer> gstRates = new ArrayList<Integer>(gstWiseTaxable.keySet());
-            Collections.sort(gstRates);
-            for (Integer rate : gstRates) {
-                if (rate > 0) {
-                    sb.append("GST" + rate + "% Txbl:Rs" + df.format(gstWiseTaxable.get(rate)) + "\n");
-                    sb.append("CGST:Rs" + df.format(gstWiseCGST.get(rate)) + 
-                             " SGST:Rs" + df.format(gstWiseSGST.get(rate)) + "\n");
-                }
-            }
-            sb.append(formatTotalRow("Total GST:", "Rs " + df.format(totalGSTAmount)));
         }
         
         sb.append(divider());
@@ -716,10 +613,6 @@ public class POSPrinter {
             }
         }
         
-        if (!companyGSTIN.isEmpty()) {
-            writeString(baos, "GSTIN: " + companyGSTIN + "\n");
-        }
-        
         writeDivider(baos);
         
         // ===== BILL INFO =====
@@ -747,9 +640,6 @@ public class POSPrinter {
         if (!"-".equals(customerPhone) && customerPhone != null && !customerPhone.isEmpty()) {
             writeString(baos, "Ph: " + customerPhone + "\n");
         }
-        if (!"-".equals(customerGSTIN) && customerGSTIN != null && !customerGSTIN.isEmpty()) {
-            writeString(baos, "GSTIN: " + customerGSTIN + "\n");
-        }
         
         writeDivider(baos);
         
@@ -766,14 +656,6 @@ public class POSPrinter {
         double totalAmount = 0;
         double totalDiscount = 0;
         double totalQtyD = 0;
-        double totalTaxableAmount = 0;
-        double totalGSTAmount = 0;
-        double totalCGST = 0;
-        double totalSGST = 0;
-        
-        Map<Integer, Double> gstWiseTaxable = new HashMap<Integer, Double>();
-        Map<Integer, Double> gstWiseCGST = new HashMap<Integer, Double>();
-        Map<Integer, Double> gstWiseSGST = new HashMap<Integer, Double>();
         
         for (Vector<Object> prod : billDetails) {
             String itemName = prod.get(0).toString();
@@ -781,33 +663,13 @@ public class POSPrinter {
             double itemPrice = Double.parseDouble(prod.get(2).toString());
             double itemDisc = Double.parseDouble(prod.get(3).toString());
             double itemTotal = Double.parseDouble(prod.get(4).toString());
-            int gstPer = Integer.parseInt(prod.get(5).toString());
-            
-            // Calculations
-            double taxableAmount = itemTotal / (1 + (gstPer / 100.0));
-            double gstAmount = itemTotal - taxableAmount;
-            double cgst = gstAmount / 2;
-            double sgst = gstAmount / 2;
             
             totalQtyD += qty;
             totalAmount += itemTotal;
             totalDiscount += itemDisc;
-            totalTaxableAmount += taxableAmount;
-            totalGSTAmount += gstAmount;
-            totalCGST += cgst;
-            totalSGST += sgst;
-            
-            if (!gstWiseTaxable.containsKey(gstPer)) {
-                gstWiseTaxable.put(gstPer, 0.0);
-                gstWiseCGST.put(gstPer, 0.0);
-                gstWiseSGST.put(gstPer, 0.0);
-            }
-            gstWiseTaxable.put(gstPer, gstWiseTaxable.get(gstPer) + taxableAmount);
-            gstWiseCGST.put(gstPer, gstWiseCGST.get(gstPer) + cgst);
-            gstWiseSGST.put(gstPer, gstWiseSGST.get(gstPer) + sgst);
             
             // Print item
-            writeString(baos, formatItemRow(itemName, prod.get(1).toString(), df.format(itemPrice), df.format(itemTotal), gstPer));
+            writeString(baos, formatItemRow(itemName, prod.get(1).toString(), df.format(itemPrice), df.format(itemTotal), 0));
             if (itemDisc > 0) {
                 writeString(baos, padLeft("Disc: -" + df.format(itemDisc), RECEIPT_WIDTH) + "\n");
             }
@@ -846,27 +708,6 @@ public class POSPrinter {
             writeBytes(baos, BOLD_ON);
             String label = balance > 0 ? "Balance:" : "Change:";
             writeString(baos, formatTotalRow(label, "Rs " + df.format(Math.abs(balance))));
-            writeBytes(baos, BOLD_OFF);
-        }
-        
-        // ===== GST SUMMARY (compact) =====
-        if (totalGSTAmount > 0) {
-            writeDivider(baos);
-            writeBytes(baos, BOLD_ON);
-            writeString(baos, "GST Summary:\n");
-            writeBytes(baos, BOLD_OFF);
-            
-            java.util.List<Integer> gstRates = new ArrayList<Integer>(gstWiseTaxable.keySet());
-            Collections.sort(gstRates);
-            for (Integer rate : gstRates) {
-                if (rate > 0) {
-                    writeString(baos, "GST" + rate + "% Txbl:Rs" + df.format(gstWiseTaxable.get(rate)) + "\n");
-                    writeString(baos, "CGST:Rs" + df.format(gstWiseCGST.get(rate)) + 
-                                     " SGST:Rs" + df.format(gstWiseSGST.get(rate)) + "\n");
-                }
-            }
-            writeBytes(baos, BOLD_ON);
-            writeString(baos, formatTotalRow("Total GST:", "Rs " + df.format(totalGSTAmount)));
             writeBytes(baos, BOLD_OFF);
         }
         
@@ -920,12 +761,7 @@ public class POSPrinter {
         StringBuilder sb = new StringBuilder();
         
         if (RECEIPT_WIDTH == RECEIPT_WIDTH_58MM) {
-            // 58mm layout: ITEM(18) Q(4) RATE(5) AMT(5)
             int nameWidth = 18;
-            // Add GST indicator to name if present
-            if (gstPer > 0 && name.length() < nameWidth - 4) {
-                name = name + "(" + gstPer + "%)";
-            }
             if (name.length() > nameWidth) {
                 name = name.substring(0, nameWidth);
             }
@@ -934,12 +770,7 @@ public class POSPrinter {
             sb.append(padLeft(rate, 5));
             sb.append(padLeft(amt, 5));
         } else {
-            // 80mm layout: ITEM(28) QTY(6) RATE(7) AMT(7)
             int nameWidth = 28;
-            // Add GST indicator if space permits
-            if (gstPer > 0 && name.length() < nameWidth - 5) {
-                name = name + "(" + gstPer + "%)";
-            }
             if (name.length() > nameWidth) {
                 name = name.substring(0, nameWidth);
             }

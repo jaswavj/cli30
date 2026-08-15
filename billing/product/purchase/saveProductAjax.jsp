@@ -65,7 +65,7 @@ try {
     }
 
     prod.addProduct(productName.trim(), Integer.parseInt(categoryId), Integer.parseInt(brandId),
-                    productCode, cost, mrp, discType, discValue, stock, userId, gst, unitId, hsn, commission);
+                    productCode, cost, mrp, discType, discValue, stock, userId, gst, unitId, hsn, commission, null);
 
     int newProductId = prod.getProductIdByNameAndCode(productName.trim(), productCode);
 

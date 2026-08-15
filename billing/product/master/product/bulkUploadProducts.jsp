@@ -59,10 +59,10 @@ try {
                 throw new Exception("Cost Price and MRP must be greater than zero.");
             }
 
-            BigDecimal stock = new BigDecimal(row.optString("stock", "0").trim().isEmpty() ? "0" : row.optString("stock", "0").trim());
-            double commission = parseDoubleOptional(row.optString("commission", "0"));
-            int discType = parseDiscType(row.optString("discType", ""));
-            double discValue = parseDoubleOptional(row.optString("discValue", "0"));
+            BigDecimal stock = BigDecimal.ZERO;
+            double commission = 0.0;
+            int discType = 0;
+            double discValue = 0.0;
             int gst = parseIntOptional(row.optString("gst", "0"));
 
             Vector selectedUnit = prod.getUnitById(unitId);
@@ -80,7 +80,7 @@ try {
             prod.addProduct(
                 productName, categoryId, brandId, productCode,
                 cost, mrp, discType, discValue, stock,
-                userId, gst, unitId, hsn, commission
+                userId, gst, unitId, hsn, commission, null
             );
             successCount++;
         } catch (Exception ex) {

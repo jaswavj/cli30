@@ -252,11 +252,6 @@ function generateESCPOSReceipt(billData) {
         });
     }
     
-    // Company GSTIN
-    if (billData.company.gstin) {
-        commands.push(...stringToBytes('GSTIN: ' + billData.company.gstin + '\n'));
-    }
-    
     commands.push(...divider());
     
     // ===== BILL INFO =====
@@ -268,9 +263,6 @@ function generateESCPOSReceipt(billData) {
     commands.push(...stringToBytes('Cust: ' + billData.customer.name + '\n'));
     if (billData.customer.phone && billData.customer.phone !== '-') {
         commands.push(...stringToBytes('Ph: ' + billData.customer.phone + '\n'));
-    }
-    if (billData.customer.gstin && billData.customer.gstin !== '-') {
-        commands.push(...stringToBytes('GSTIN: ' + billData.customer.gstin + '\n'));
     }
     
     commands.push(...divider());
@@ -288,7 +280,7 @@ function generateESCPOSReceipt(billData) {
             item.qty.toString(),
             formatNumber(item.price),
             formatNumber(item.total),
-            item.gstPercent
+            0
         )));
         
         if (item.discount > 0) {
@@ -323,25 +315,6 @@ function generateESCPOSReceipt(billData) {
         commands.push(...ESC_POS.BOLD_ON);
         const label = billData.totals.balance > 0 ? 'Balance:' : 'Change:';
         commands.push(...stringToBytes(formatTotalRow(label, 'Rs ' + formatNumber(Math.abs(billData.totals.balance)))));
-        commands.push(...ESC_POS.BOLD_OFF);
-    }
-    
-    // ===== GST SUMMARY =====
-    if (billData.gstSummary && billData.gstSummary.length > 0) {
-        commands.push(...divider());
-        commands.push(...ESC_POS.BOLD_ON);
-        commands.push(...stringToBytes('GST Summary:\n'));
-        commands.push(...ESC_POS.BOLD_OFF);
-        
-        billData.gstSummary.forEach(gst => {
-            if (gst.rate > 0) {
-                commands.push(...stringToBytes('GST' + gst.rate + '% Txbl:Rs' + formatNumber(gst.taxable) + '\n'));
-                commands.push(...stringToBytes('CGST:Rs' + formatNumber(gst.cgst) + ' SGST:Rs' + formatNumber(gst.sgst) + '\n'));
-            }
-        });
-        
-        commands.push(...ESC_POS.BOLD_ON);
-        commands.push(...stringToBytes(formatTotalRow('Total GST:', 'Rs ' + formatNumber(billData.totals.totalGST))));
         commands.push(...ESC_POS.BOLD_OFF);
     }
     
@@ -385,18 +358,12 @@ function formatItemRow(name, qty, rate, amt, gstPer) {
     
     if (RECEIPT_WIDTH === RECEIPT_WIDTH_58MM) {
         const nameWidth = 18;
-        if (gstPer > 0 && name.length < nameWidth - 4) {
-            name = name + '(' + gstPer + '%)';
-        }
         if (name.length > nameWidth) {
             name = name.substring(0, nameWidth);
         }
         line = padRight(name, nameWidth) + padRight(qty, 4) + padLeft(rate, 5) + padLeft(amt, 5);
     } else {
         const nameWidth = 28;
-        if (gstPer > 0 && name.length < nameWidth - 5) {
-            name = name + '(' + gstPer + '%)';
-        }
         if (name.length > nameWidth) {
             name = name.substring(0, nameWidth);
         }

@@ -99,6 +99,7 @@
                 productObj.put("unitId", row.elementAt(13) != null ? row.elementAt(13).toString() : "");
                 productObj.put("hsn", row.elementAt(14) != null ? row.elementAt(14).toString() : "");
                 productObj.put("commission", row.size() > 16 && row.elementAt(16) != null ? Double.parseDouble(row.elementAt(16).toString()) : 0.0);
+                productObj.put("tamilName", row.size() > 17 && row.elementAt(17) != null ? row.elementAt(17).toString() : "");
                 productObj.put("stock", row.elementAt(6) != null ? row.elementAt(6).toString() : "0");
                 
                 // Get unit name and conversion unit from pre-built map

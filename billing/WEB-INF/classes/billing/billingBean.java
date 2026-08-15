@@ -1031,7 +1031,7 @@ public Vector getBillDetailsUsingNo(String bill) throws Exception {
     try {
         con = util.DBConnectionManager.getConnectionFromPool();
         
-        String sql = "SELECT c.`name`,b.`qty`,b.`price`,b.`disc`,b.`total`,b.gst,d.name AS category_name,c.hsn,IFNULL(u.name,'') AS unit_name,IFNULL(u.convertion_unit,'') AS convertion_unit FROM `prod_bill` a "
+        String sql = "SELECT COALESCE(NULLIF(TRIM(c.tamil_name), ''), c.`name`) AS print_name,b.`qty`,b.`price`,b.`disc`,b.`total`,b.gst,d.name AS category_name,c.hsn,IFNULL(u.name,'') AS unit_name,IFNULL(u.convertion_unit,'') AS convertion_unit FROM `prod_bill` a "
 					+"	JOIN `prod_bill_details` b ON b.`bill_id`=a.`id` "
 					+"	JOIN `prod_product` c ON c.id=b.`prod_id` "
 					+"	LEFT JOIN `prod_category` d ON d.id=c.category_id "

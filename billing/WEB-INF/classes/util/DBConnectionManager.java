@@ -27,6 +27,13 @@ public final class DBConnectionManager
 		{
 		Connection con = 	manager.ds.getConnection();
 		con.setAutoCommit(false);
+		try (Statement st = con.createStatement()) {
+			st.execute("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+			st.execute("SET CHARACTER SET utf8mb4");
+			st.execute("SET character_set_connection = utf8mb4");
+			st.execute("SET character_set_results = utf8mb4");
+			st.execute("SET character_set_client = utf8mb4");
+		}
 		
 		return con;
 		}

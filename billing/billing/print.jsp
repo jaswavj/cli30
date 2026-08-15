@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page language="java" import="java.util.*"%>
 <%@ page language="java" import="java.text.DecimalFormat"%>
 
@@ -70,55 +70,20 @@ if (companyDetails != null && companyDetails.size() >= 4) {
 
 DecimalFormat df = new DecimalFormat("0.00");
 
-// GST Calculation variables
+// Totals
 double totalAmount = 0;
 double totalDiscount = 0;
 double finalPaid = 0;
-double totalItemAmount = 0;
-double totalTaxableAmount = 0;
-double totalCGST = 0;
-double totalSGST = 0;
-double totalIGST = 0;
-double totalGSTAmount = 0;
 double totalQty = 0;
 double subTotalBeforeDiscount = 0;
 
-// Map to store GST-wise totals
-Map<Integer, Double> gstWiseTaxable = new HashMap<Integer, Double>();
-Map<Integer, Double> gstWiseCGST = new HashMap<Integer, Double>();
-Map<Integer, Double> gstWiseSGST = new HashMap<Integer, Double>();
-
 for(Vector<Object> prod : billDetails){
-    double itemTotal = Double.parseDouble(prod.get(4).toString());
-    double itemDisc = Double.parseDouble(prod.get(3).toString());
-    double itemPrice = Double.parseDouble(prod.get(2).toString());
-    int gstPer = Integer.parseInt(prod.get(5).toString());
-    double qty = Double.parseDouble(prod.get(1).toString());
-    
-    // Calculate taxable amount (amount before GST)
-    double taxableAmount = itemTotal / (1 + (gstPer / 100.0));
-    double gstAmount = itemTotal - taxableAmount;
-    double cgst = gstAmount / 2;
-    double sgst = gstAmount / 2;
-    
-    totalAmount += itemTotal;
-    totalDiscount += itemDisc;
-    totalItemAmount += itemPrice;
-    totalTaxableAmount += taxableAmount;
-    totalCGST += cgst;
-    totalSGST += sgst;
-    totalGSTAmount += gstAmount;
-    totalQty += qty;
-    
-    // Group by GST rate
-    gstWiseTaxable.put(gstPer, gstWiseTaxable.getOrDefault(gstPer, 0.0) + taxableAmount);
-    gstWiseCGST.put(gstPer, gstWiseCGST.getOrDefault(gstPer, 0.0) + cgst);
-    gstWiseSGST.put(gstPer, gstWiseSGST.getOrDefault(gstPer, 0.0) + sgst);
+    totalAmount += Double.parseDouble(prod.get(4).toString());
+    totalDiscount += Double.parseDouble(prod.get(3).toString());
+    totalQty += Double.parseDouble(prod.get(1).toString());
 }
 
-// Calculate subtotal before discount (totalAmount is after item discounts, so add them back)
 subTotalBeforeDiscount = totalAmount + totalDiscount;
-    
 finalPaid = totalAmount - extradisc;
 
 // Payment Summary data
@@ -557,7 +522,7 @@ try {
     <button class="btn btn-cancel" onclick="cancelPrint()">❌ Cancel</button>
 </div>
 
-<div class="header-title">Tax Invoice</div>
+<div class="header-title">Invoice</div>
 
 <div class="container">
     <!-- Header -->
@@ -584,9 +549,6 @@ try {
                 } 
                 %>
             <% } %>
-            <% if (!companyGSTIN.isEmpty()) { %>
-                <div>GSTIN: <%= companyGSTIN %></div>
-            <% } %>
         </div>
     </div>
 
@@ -602,9 +564,6 @@ try {
                 <% if(customerAddress != null && !customerAddress.equals("-") && !customerAddress.trim().isEmpty()) { %>
                 <div><%= customerAddress %></div>
                 <% } %>
-                <% if(customerGSTIN != null && !customerGSTIN.equals("-") && !customerGSTIN.trim().isEmpty()) { %>
-                <div>GSTIN: <%= customerGSTIN %></div>
-                <% } %>
             </div>
         </div>
         <div class="invoice-details-box">
@@ -612,7 +571,6 @@ try {
             <div class="info-content text-right">
                 <div>Invoice No.: <%= billNo %></div>
                 <div>Date: <%= billDate %></div>
-                <div>Place of Supply: Tamil Nadu</div>
                 <% if (lrNo != null && !lrNo.trim().isEmpty()) { %>
                 <div>LR No.: <%= lrNo %></div>
                 <% } %>
@@ -631,14 +589,10 @@ try {
         <thead>
             <tr>
                 <th style="width: 5%;">S.No</th>
-                <th style="width: 30%;">Item name</th>
-                <th style="width: 8%;">HSN/SAC</th>
-                <th style="width: 10%;">price/Unit</th>
-                <th style="width: 5%;">Qty</th>
-                <th style="width: 8%;">Taxable</th>
-                <th style="width: 10%;">CGST</th>
-                <th style="width: 10%;">SGST</th>
-                <th style="width: 14%;">Amount</th>
+                <th style="width: 45%;">Item name</th>
+                <th style="width: 15%;">Price/Unit</th>
+                <th style="width: 10%;">Qty</th>
+                <th style="width: 15%;">Amount</th>
             </tr>
         </thead>
         <tbody>
@@ -647,7 +601,6 @@ try {
             for(Vector<Object> prod : billDetails){
                 double itemTotal = Double.parseDouble(prod.get(4).toString());
                 double itemPrice = Double.parseDouble(prod.get(2).toString());
-                int gstPer = Integer.parseInt(prod.get(5).toString());
                 double qty = Double.parseDouble(prod.get(1).toString());
                 
                 String category = "";
@@ -657,33 +610,19 @@ try {
                 String productName = prod.get(0).toString();
                 String displayName = (category.isEmpty()) ? productName : category + " - " + productName;
                 
-                String hsnCode = "";
-                if(prod.size() > 7 && prod.get(7) != null){
-                    hsnCode = prod.get(7).toString();
-                }
-                
                 String unitName = "";
                 if(prod.size() > 8 && prod.get(8) != null){
                     unitName = prod.get(8).toString();
                 }
-                
-                double taxableAmount = itemTotal / (1 + (gstPer / 100.0));
-                double gstAmount = itemTotal - taxableAmount;
-                double cgst = gstAmount / 2;
-                double sgst = gstAmount / 2;
             %>
             <tr class="item-row">
                 <td class="text-center" style="width: 5%;"><%= count++ %></td>
-                <td style="width: 30%;">
+                <td style="width: 45%;">
                     <div class="font-bold"><%= displayName %></div>
                 </td>
-                <td class="text-center" style="width: 8%;"><%= hsnCode %></td>
-                <td class="text-right" style="width: 10%;"><%= df.format(itemPrice) %></td>
-                <td class="text-center" style="width: 5%;"><%= qty %><% if(unitName != null && !unitName.trim().isEmpty()) { %> <%= unitName %><% } %></td>
-                <td class="text-right" style="width: 8%;"><%= df.format(taxableAmount) %></td>
-                <td class="text-right" style="width: 10%;"><%= df.format(cgst) %></td>
-                <td class="text-right" style="width: 10%;"><%= df.format(sgst) %></td>
-                <td class="text-right" style="width: 14%;"><%= df.format(itemTotal) %></td>
+                <td class="text-right" style="width: 15%;"><%= df.format(itemPrice) %></td>
+                <td class="text-center" style="width: 10%;"><%= qty %><% if(unitName != null && !unitName.trim().isEmpty()) { %> <%= unitName %><% } %></td>
+                <td class="text-right" style="width: 15%;"><%= df.format(itemTotal) %></td>
             </tr>
             <% } %>
             
@@ -696,56 +635,25 @@ try {
             %>
             <tr class="empty-filler-row">
                 <td class="text-center" style="width: 5%; height: 25px;">&nbsp;</td>
-                <td style="width: 30%;">&nbsp;</td>
-                <td class="text-center" style="width: 8%;">&nbsp;</td>
-                <td class="text-right" style="width: 10%;">&nbsp;</td>
-                <td class="text-center" style="width: 5%;">&nbsp;</td>
-                <td class="text-right" style="width: 10%;">&nbsp;</td>
-                <td class="text-right" style="width: 10%;">&nbsp;</td>
-                <td class="text-right" style="width: 10%;">&nbsp;</td>
-                <td class="text-right" style="width: 11%;">&nbsp;</td>
+                <td style="width: 45%;">&nbsp;</td>
+                <td class="text-right" style="width: 15%;">&nbsp;</td>
+                <td class="text-center" style="width: 10%;">&nbsp;</td>
+                <td class="text-right" style="width: 15%;">&nbsp;</td>
             </tr>
             <% } %>
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td colspan="4" class="text-right" style="width: 55%;">Total</td>
-                <td class="text-center" style="width: 8%;"><%= totalQty %></td>
-                <td class="text-right" style="width: 12%;"> <%= df.format(totalTaxableAmount) %></td>
-                <td class="text-right" style="width: 8%;"> <%= df.format(totalCGST) %></td>
-                <td class="text-right" style="width: 8%;"> <%= df.format(totalSGST) %></td>
-                <td class="text-right" style="width: 9%;"> <%= df.format(totalAmount) %></td>
+                <td colspan="3" class="text-right" style="width: 65%;">Total</td>
+                <td class="text-center" style="width: 10%;"><%= totalQty %></td>
+                <td class="text-right" style="width: 15%;"> <%= df.format(totalAmount) %></td>
             </tr>
         </tfoot>
     </table>
 
-    <!-- Tax & Amounts -->
+    <!-- Amounts -->
     <div class="tax-amounts-row">
-        <div class="tax-box">
-            <div class="tax-row border-bottom">
-                <div>Tax details</div>
-                <div>
-                    <% 
-                    for(Integer rate : gstWiseTaxable.keySet()) {
-                        out.print(rate + ".0%");
-                    }
-                    %>
-                </div>
-            </div>
-            <div class="tax-row">
-                <div>CGST</div>
-                <div>₹ <%= df.format(totalCGST) %></div>
-            </div>
-            <div class="tax-row">
-                <div>SGST</div>
-                <div>₹ <%= df.format(totalSGST) %></div>
-            </div>
-            <div class="tax-row">
-                <div>IGST</div>
-                <div>₹ <%= df.format(totalIGST) %></div>
-            </div>
-        </div>
-        <div class="amounts-box">
+        <div class="amounts-box" style="width: 100%;">
             <div class="purple-header">Amounts</div>
             <div class="amount-row bg-light-purple">
                 <div>Sub Total</div>

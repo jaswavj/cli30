@@ -1,29 +1,22 @@
-           JASXBILL BILLING SOFTWARE            
-                 YOUR ADDRESS1                  
-                 YOUR ADDRESS2                  
-                 YOUR ADDRESS3                  
-             PHONE NO : XXXXXXXXXX              
-             GSTIN: BAKPJ1364545454             
+                    JASXBILL                    
+                    Address                     
 ------------------------------------------------
-Bill: 26-3                   10-03-2026 14:57:51
-Cust: -
+Bill: 26-3                   15-08-2026 23:07:21
+Cust: jaswa
+Ph: 9597451419
 ------------------------------------------------
 ITEM                        QTY      RATE    AMT
 ------------------------------------------------
-Gold(5%)                    5.00  15200.0076000.00
+மிளகு                       1.00   100.00 100.00
+மஞ்சள்                      1.00    12.00  12.00
 ------------------------------------------------
-Items:                                         5
+Items:                                         2
 ------------------------------------------------
-TOTAL:                               Rs 76000.00
+TOTAL:                                 Rs 112.00
 ------------------------------------------------
-Paid:                                Rs 76000.00
+Paid:                                  Rs 112.00
 ------------------------------------------------
-GST Summary:
-GST5% Txbl:Rs72380.95
-CGST:Rs1809.52 SGST:Rs1809.52
-Total GST:                            Rs 3619.05
-------------------------------------------------
-        SEVENTY SIX THOUSAND RUPEES ONLY        
+         ONE HUNDRED TWELVE RUPEES ONLY         
              Thank You! Visit Again             
 
 

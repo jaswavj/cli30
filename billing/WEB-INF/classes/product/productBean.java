@@ -1032,7 +1032,7 @@ public int checkTheProductNameExist(String name)throws Exception
         if (con != null) try { con.close(); } catch (Exception e) { }
     }
 }*/
-public void addProduct(String productName, int categoryId, int brandId, String code, double cost, double mrp, int discType, double discValue, BigDecimal stock,int uid,int gst, int unitId, String hsn, double commission) throws Exception {
+public void addProduct(String productName, int categoryId, int brandId, String code, double cost, double mrp, int discType, double discValue, BigDecimal stock,int uid,int gst, int unitId, String hsn, double commission, String tamilName) throws Exception {
     Connection con = null;
     PreparedStatement pt1 = null, pt2 = null, pt3 = null;
     ResultSet rs = null;
@@ -1042,7 +1042,7 @@ public void addProduct(String productName, int categoryId, int brandId, String c
         con.setAutoCommit(false); // Start transaction
 
         // Step 1: Insert into prod_product
-        String sql1 = "INSERT INTO `prod_product`(NAME, category_id, brand_id, DATE, TIME, code,uid,gst,unit_id,hsn) VALUES (?, ?, ?, NOW(), NOW(), ?,?,?,?,?)";
+        String sql1 = "INSERT INTO `prod_product`(NAME, category_id, brand_id, DATE, TIME, code,uid,gst,unit_id,hsn,tamil_name) VALUES (?, ?, ?, NOW(), NOW(), ?,?,?,?,?,?)";
         pt1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
         pt1.setString(1, productName);
         pt1.setInt(2, categoryId);
@@ -1059,6 +1059,11 @@ public void addProduct(String productName, int categoryId, int brandId, String c
             }
         } else {
             pt1.setNull(8, java.sql.Types.INTEGER);
+        }
+        if (tamilName != null && !tamilName.trim().isEmpty()) {
+            pt1.setString(9, tamilName.trim());
+        } else {
+            pt1.setNull(9, java.sql.Types.VARCHAR);
         }
 
         int rows1 = pt1.executeUpdate();
@@ -1165,7 +1170,7 @@ public Vector getAllProducts() throws Exception
 	pt = con.prepareStatement("SELECT a.`name`,a.`code`,b.`name`,c.`name`,d.`mrp`,CASE "
 							+"	WHEN d.disc_type = 1 THEN CONCAT(CAST(d.discount AS UNSIGNED), ' RS')  "
 							+"	WHEN d.disc_type = 2 THEN CONCAT(CAST(d.discount AS UNSIGNED), ' %') "
-							+"	ELSE 'No Discount' END AS discount_display,d.stock,d.added_stock,a.id,d.cost,d.disc_type,d.discount,a.gst,a.unit_id,a.hsn,e.`name`,d.commission  "
+							+"	ELSE 'No Discount' END AS discount_display,d.stock,d.added_stock,a.id,d.cost,d.disc_type,d.discount,a.gst,a.unit_id,a.hsn,e.`name`,d.commission,a.tamil_name  "
 							+"	FROM `prod_product` a "
 							+"	JOIN `prod_category` b ON a.`category_id`=b.id "
 							+"	JOIN `prod_brands` c ON a.`brand_id`=c.id "
@@ -1195,6 +1200,7 @@ public Vector getAllProducts() throws Exception
 			vec.addElement(rs.getString(15) );  // hsn
 			vec.addElement(rs.getString(16) );  // unit name
 			vec.addElement(rs.getString(17) );  // commission
+			vec.addElement(rs.getString(18) );  // tamil_name
 
 		major.addElement(vec);
 
@@ -1615,7 +1621,7 @@ public void blockProduct(int id)throws Exception
 		}
 }*/
 public void editProduct(int productId, String newProduct, String proCode, int categoryId, int brandId,
-                        double mrp, double cost, double discValue, int discType, int gst, int uid, int unitId, String hsn, double commission) throws Exception {
+                        double mrp, double cost, double discValue, int discType, int gst, int uid, int unitId, String hsn, double commission, String tamilName) throws Exception {
     Connection con = null;
     PreparedStatement pt = null;
     ResultSet rs = null;
@@ -1625,7 +1631,7 @@ public void editProduct(int productId, String newProduct, String proCode, int ca
         con.setAutoCommit(false); // start transaction
 
 
-        pt = con.prepareStatement("UPDATE prod_product SET name=?, code=?, category_id=?, brand_id=?, gst=?, unit_id=?, hsn=? WHERE id=?");
+        pt = con.prepareStatement("UPDATE prod_product SET name=?, code=?, category_id=?, brand_id=?, gst=?, unit_id=?, hsn=?, tamil_name=? WHERE id=?");
         pt.setString(1, newProduct);
         pt.setString(2, proCode);
         pt.setInt(3, categoryId);
@@ -1641,7 +1647,12 @@ public void editProduct(int productId, String newProduct, String proCode, int ca
         } else {
             pt.setNull(7, java.sql.Types.INTEGER);
         }
-        pt.setInt(8, productId);
+        if (tamilName != null && !tamilName.trim().isEmpty()) {
+            pt.setString(8, tamilName.trim());
+        } else {
+            pt.setNull(8, java.sql.Types.VARCHAR);
+        }
+        pt.setInt(9, productId);
         pt.executeUpdate();
         pt.close();
 

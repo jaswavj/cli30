@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page language="java" import="java.util.*"%>
 <%@ page errorPage="" %>
 <jsp:useBean id="prod" class="product.productBean" />
@@ -106,6 +106,10 @@ String type = request.getParameter("type"); // success / warning / danger / info
                             <div class="col-md-12">
                                 <label style="font-size: 0.85rem;"><%=head3%> Name <span style="color:red">*</span></label><input type="text" name="productName" class="form-control" placeholder="" style="padding: 7px 10px; font-size: 0.9rem;" required>
                             </div>
+                            <div class="col-md-12">
+                                <label style="font-size: 0.85rem;">Product Name in Tamil (for print)</label>
+                                <textarea name="tamilName" id="tamilNameInput" class="form-control" rows="2" placeholder="தமிழில் பொருளின் பெயர்" style="padding: 7px 10px; font-size: 0.9rem; resize: vertical;"></textarea>
+                            </div>
                             <div class="col-md-6 ">
                                 <label style="font-size: 0.85rem;"><%=head3%> Code <span style="color:red">*</span></label><input type="text" name="productCode" class="form-control" placeholder="" style="padding: 7px 10px; font-size: 0.9rem;" >
                             </div>
@@ -137,11 +141,11 @@ String type = request.getParameter("type"); // success / warning / danger / info
                                 </select>
                             </div>
                             
-                            <div class="col-md-6 ">
-                                <label style="font-size: 0.85rem;">Stock</label><input type="number" name="stock" id="stockInput" class="form-control" placeholder="" style="padding: 7px 10px; font-size: 0.9rem;" min="0" step="0.01" value="0" required>
-                                <small id="stockConversionNote" class="text-muted d-block mt-1"></small>
-                            </div>
-                            
+                            <input type="hidden" name="stock" id="stockInput" value="0">
+                            <input type="hidden" name="commission" id="commissionInput" value="0.00">
+                            <input type="hidden" name="discType" id="discType" value="0">
+                            <input type="hidden" name="discValue" id="discValue" value="0.00">
+
                             <div class="col-md-6 ">
                                 <label id="costPriceLabel" style="font-size: 0.85rem;">Cost Price <span style="color:red">*</span></label><input type="number" step="0.001" name="cost" id="costInput" class="form-control" placeholder=" " style="padding: 7px 10px; font-size: 0.9rem;" required>
                                 <small id="costConversionNote" class="text-muted d-block mt-1"></small>
@@ -150,22 +154,6 @@ String type = request.getParameter("type"); // success / warning / danger / info
                                 <label id="mrpLabel" style="font-size: 0.85rem;">MRP <span style="color:red">*</span></label><input type="number" step="0.001" name="mrp" id="mrpInput" class="form-control" placeholder=" " style="padding: 7px 10px; font-size: 0.9rem;" required>
                                 <small id="mrpConversionNote" class="text-muted d-block mt-1"></small>
                             </div>
-                            <div class="col-md-6 ">
-                                <label style="font-size: 0.85rem;">Commission (Rs)</label><input type="number" step="0.01" name="commission" id="commissionInput" class="form-control" placeholder="0.00" style="padding: 7px 10px; font-size: 0.9rem;" value="0.00">
-                                <small id="commissionConversionNote" class="text-muted d-block mt-1"></small>
-                            </div>
-                            <div class="col-md-6 ">
-                                <label style="font-size: 0.85rem;">Discount Type</label>
-                                <select class="form-select" id="discType" name="discType" onchange="handleDiscTypeChange(this)" style="padding: 7px 10px; font-size: 0.9rem;" required>
-                                    <option value="0">Select Type</option>
-                                    <option value="1">Rs</option>
-                                    <option value="2">%</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 ">
-                                <label id="discountLabel" style="font-size: 0.85rem;">Discount</label><input type="text" id="discValue" name="discValue" class="form-control" value="0.00" style="padding: 7px 10px; font-size: 0.9rem;" readonly>
-                            </div>
-                            
                             <div class="col-md-6">
                                 <label style="font-size: 0.85rem;">GST %</label>
                                 <select class="form-select" name="gst" style="padding: 7px 10px; font-size: 0.9rem;" required>
@@ -278,12 +266,11 @@ String type = request.getParameter("type"); // success / warning / danger / info
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
     const contextPath = '<%=contextPath%>';
-    const bulkCategories = [<%
+    const bulkCategories = [<% 
         Vector bulkCats = prod.getCategoryName();
         if (bulkCats != null) {
             for (int bc = 0; bc < bulkCats.size(); bc++) {
@@ -295,7 +282,7 @@ String type = request.getParameter("type"); // success / warning / danger / info
             }
         }
     %>];
-    const bulkBrands = [<%
+    const bulkBrands = [<% 
         Vector bulkBr = prod.getBrandsName();
         if (bulkBr != null) {
             for (int bb = 0; bb < bulkBr.size(); bb++) {
@@ -307,7 +294,7 @@ String type = request.getParameter("type"); // success / warning / danger / info
             }
         }
     %>];
-    const bulkUnits = [<%
+    const bulkUnits = [<% 
         Vector bulkUn = prod.getUnits();
         if (bulkUn != null) {
             for (int bu = 0; bu < bulkUn.size(); bu++) {
@@ -319,7 +306,7 @@ String type = request.getParameter("type"); // success / warning / danger / info
             }
         }
     %>];
-    const BULK_HEADERS = ['Category','Brand','Product Name','Product Code','HSN','Unit','Stock','Cost Price','MRP','Commission','Discount Type','Discount Value','GST'];
+    const BULK_HEADERS = ['Category','Brand','Product Name','Product Code','HSN','Unit','Cost Price','MRP','GST'];
 
     function pickBulkField(obj, aliases) {
         const keys = Object.keys(obj);
@@ -342,8 +329,8 @@ String type = request.getParameter("type"); // success / warning / danger / info
         const wb = XLSX.utils.book_new();
         const products = [
             BULK_HEADERS,
-            ['General','Others','Sample Product 1','SP001','1234','Nos','10','50','100','0','Rs','0','18'],
-            ['General','Others','Sample Product 2','SP002','5678','Nos','0','25','45','0','%','5','5']
+            ['General','Others','Sample Product 1','SP001','1234','Nos','50','100','18'],
+            ['General','Others','Sample Product 2','SP002','5678','Nos','25','45','5']
         ];
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(products), 'Products');
 
@@ -358,8 +345,8 @@ String type = request.getParameter("type"); // success / warning / danger / info
         ref.push(['']);
         ref.push(['Notes']);
         ref.push(['Use exact Category, Brand and Unit names from this sheet.']);
-        ref.push(['Discount Type: Rs, %, or leave blank.']);
         ref.push(['Required: Category, Brand, Product Name, Unit, Cost Price, MRP.']);
+        ref.push(['Stock, Commission and Discount use default values on import.']);
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ref), 'Reference');
 
         XLSX.writeFile(wb, 'Product_Bulk_Upload_Sample.xlsx');
@@ -390,12 +377,8 @@ String type = request.getParameter("type"); // success / warning / danger / info
                         productCode: pickBulkField(item, ['product code', 'code']),
                         hsn: pickBulkField(item, ['hsn', 'hsn code']),
                         unitName: pickBulkField(item, ['unit', 'unit/size', 'unit name']),
-                        stock: pickBulkField(item, ['stock']),
                         cost: pickBulkField(item, ['cost price', 'cost']),
                         mrp: pickBulkField(item, ['mrp']),
-                        commission: pickBulkField(item, ['commission']),
-                        discType: pickBulkField(item, ['discount type', 'disctype']),
-                        discValue: pickBulkField(item, ['discount value', 'discount']),
                         gst: pickBulkField(item, ['gst', 'gst %'])
                     });
                 });
@@ -471,51 +454,18 @@ String type = request.getParameter("type"); // success / warning / danger / info
         });
     }
 
-    function updateStockConversionNote() {
-        const unitSelect = document.getElementById('unitSelect');
-        const stockInput = document.getElementById('stockInput');
-        const note = document.getElementById('stockConversionNote');
-        if (!unitSelect || !stockInput || !note) return;
-
-        const selectedOption = unitSelect.options[unitSelect.selectedIndex];
-        if (!selectedOption || unitSelect.value === '') {
-            note.textContent = '';
-            return;
-        }
-
-        const baseUnitName = selectedOption.text || '';
-        const convertionUnit = selectedOption.getAttribute('data-convertion-unit') || '';
-        const convertionCalculation = parseFloat(selectedOption.getAttribute('data-convertion-calculation') || '0');
-        const stockValue = parseFloat(stockInput.value || '0');
-
-        if (convertionUnit.trim() === '' || isNaN(convertionCalculation) || convertionCalculation <= 0) {
-            note.textContent = '';
-            return;
-        }
-
-        if (!isNaN(stockValue) && stockValue > 0) {
-            const convertedStock = stockValue * convertionCalculation;
-            note.textContent = 'Converted: ' + convertedStock.toFixed(3) + ' ' + convertionUnit + ' (' + stockValue + ' x ' + convertionCalculation + ')';
-        } else {
-            note.textContent = 'Enter stock: how many ' + convertionUnit + ' per ' + baseUnitName + '.';
-        }
-    }
-
     function updateConvertedPriceNotes() {
         const unitSelect = document.getElementById('unitSelect');
         const costInput = document.getElementById('costInput');
         const mrpInput = document.getElementById('mrpInput');
-        const commissionInput = document.getElementById('commissionInput');
         const costNote = document.getElementById('costConversionNote');
         const mrpNote = document.getElementById('mrpConversionNote');
-        const commissionNote = document.getElementById('commissionConversionNote');
-        if (!unitSelect || !costInput || !mrpInput || !commissionInput || !costNote || !mrpNote || !commissionNote) return;
+        if (!unitSelect || !costInput || !mrpInput || !costNote || !mrpNote) return;
 
         const selectedOption = unitSelect.options[unitSelect.selectedIndex];
         if (!selectedOption || unitSelect.value === '') {
             costNote.textContent = '';
             mrpNote.textContent = '';
-            commissionNote.textContent = '';
             return;
         }
 
@@ -523,12 +473,10 @@ String type = request.getParameter("type"); // success / warning / danger / info
         const convertionCalculation = parseFloat(selectedOption.getAttribute('data-convertion-calculation') || '0');
         const costValue = parseFloat(costInput.value || '0');
         const mrpValue = parseFloat(mrpInput.value || '0');
-        const commissionValue = parseFloat(commissionInput.value || '0');
 
         if (convertionUnit.trim() === '' || isNaN(convertionCalculation) || convertionCalculation <= 0) {
             costNote.textContent = '';
             mrpNote.textContent = '';
-            commissionNote.textContent = '';
             return;
         }
 
@@ -545,44 +493,29 @@ String type = request.getParameter("type"); // success / warning / danger / info
         } else {
             mrpNote.textContent = '';
         }
-
-        if (!isNaN(commissionValue) && commissionValue > 0) {
-            const convertedCommission = commissionValue / convertionCalculation;
-            commissionNote.textContent = 'Converted Commission per ' + convertionUnit + ': ' + convertedCommission.toFixed(3);
-        } else {
-            commissionNote.textContent = '';
-        }
     }
 
     function handleUnitChange(select) {
         const selectedText = select.options[select.selectedIndex].text;
         const costPriceLabel = document.getElementById('costPriceLabel');
         const mrpLabel = document.getElementById('mrpLabel');
-        const discountLabel = document.getElementById('discountLabel');
-        
+
         if (select.value === "") {
             costPriceLabel.textContent = "Cost Price";
             mrpLabel.textContent = "MRP";
-            discountLabel.textContent = "Discount";
         } else {
             costPriceLabel.textContent = "Cost Price per " + selectedText;
             mrpLabel.textContent = "MRP per " + selectedText;
-            discountLabel.textContent = "Discount per " + selectedText;
         }
 
-        updateStockConversionNote();
         updateConvertedPriceNotes();
     }
-    
-    function handleDiscTypeChange(select) {
-        const discValueInput = document.getElementById('discValue');
-        if (select.value === "0") {
-            discValueInput.value = "0.00";
-            discValueInput.readOnly = true;
-        } else {
-            discValueInput.readOnly = false;
-            discValueInput.value = "";
-        }
+
+    function setHiddenDefaults() {
+        document.getElementById('stockInput').value = '0';
+        document.getElementById('commissionInput').value = '0.00';
+        document.getElementById('discType').value = '0';
+        document.getElementById('discValue').value = '0.00';
     }
 
     // Pagination and search variables
@@ -772,10 +705,8 @@ String type = request.getParameter("type"); // success / warning / danger / info
     }
 
     // Product search functionality with debouncing
-    document.getElementById('stockInput').addEventListener('input', updateStockConversionNote);
     document.getElementById('costInput').addEventListener('input', updateConvertedPriceNotes);
     document.getElementById('mrpInput').addEventListener('input', updateConvertedPriceNotes);
-    document.getElementById('commissionInput').addEventListener('input', updateConvertedPriceNotes);
 
     document.getElementById('productSearch').addEventListener('input', function() {
         const searchTerm = this.value.trim();
@@ -799,13 +730,10 @@ String type = request.getParameter("type"); // success / warning / danger / info
         // Set form field values
         const form = document.getElementById('productForm');
         form.querySelector('[name="productName"]').value = product.productName || '';
+        form.querySelector('[name="tamilName"]').value = product.tamilName || '';
         form.querySelector('[name="productCode"]').value = product.prodCode || '';
         form.querySelector('[name="hsn"]').value = product.hsn || '';
-        form.querySelector('[name="commission"]').value = product.commission || '0.00';
-        form.querySelector('[name="discValue"]').value = product.discount || '0.00';
-        form.querySelector('[name="stock"]').value = '';
-        form.querySelector('[name="stock"]').removeAttribute('required');
-        form.querySelector('[name="stock"]').disabled = true;
+        setHiddenDefaults();
 
         // Set category dropdown
         const catSelect = form.querySelector('[name="categoryId"]');
@@ -843,14 +771,6 @@ String type = request.getParameter("type"); // success / warning / danger / info
             if (opt.value == product.gst) { opt.selected = true; break; }
         }
 
-        // Set discount type
-        const discTypeSelect = document.getElementById('discType');
-        for (let opt of discTypeSelect.options) {
-            if (opt.value == product.discType) { opt.selected = true; break; }
-        }
-        handleDiscTypeChange(discTypeSelect);
-        document.getElementById('discValue').value = product.discount || '0.00';
-
         // Update button
         document.getElementById('submitBtnText').textContent = 'Update';
         document.getElementById('submitBtnIcon').className = 'fas fa-pen me-1';
@@ -872,12 +792,7 @@ String type = request.getParameter("type"); // success / warning / danger / info
         document.getElementById('editProductId').value = '0';
         document.getElementById('productForm').action = 'product1.jsp';
         document.getElementById('productForm').reset();
-
-        // Re-enable stock
-        const stockInput = document.querySelector('[name="stock"]');
-        stockInput.disabled = false;
-        stockInput.setAttribute('required', 'required');
-        stockInput.value = '0';
+        setHiddenDefaults();
 
         // Reset button
         document.getElementById('submitBtnText').textContent = 'Add';
@@ -891,17 +806,9 @@ String type = request.getParameter("type"); // success / warning / danger / info
         // Reset card header
         document.querySelector('.card-header h6').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Add New Product';
 
-        // Reset discount
-        document.getElementById('discValue').value = '0.00';
-        document.getElementById('discValue').readOnly = true;
-
-        // Reset commission
-        document.getElementById('commissionInput').value = '0.00';
-
         // Reset labels
         document.getElementById('costPriceLabel').textContent = 'Cost Price';
         document.getElementById('mrpLabel').textContent = 'MRP';
-        document.getElementById('discountLabel').textContent = 'Discount';
         document.getElementById('costConversionNote').textContent = '';
         document.getElementById('mrpConversionNote').textContent = '';
 
@@ -920,15 +827,15 @@ String type = request.getParameter("type"); // success / warning / danger / info
         }
 
         handleUnitChange(unitSelect);
-        updateStockConversionNote();
         updateConvertedPriceNotes();
     }
 
     // Load products on page load
     document.addEventListener('DOMContentLoaded', function() {
+        setHiddenDefaults();
+        document.getElementById('productForm').addEventListener('submit', setHiddenDefaults);
         loadProducts(1, '');
         handleUnitChange(document.getElementById('unitSelect'));
-        updateStockConversionNote();
         updateConvertedPriceNotes();
     });
 </script>

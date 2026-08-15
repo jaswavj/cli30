@@ -1,7 +1,8 @@
-<%@page language="java" import="java.util.*, java.math.BigDecimal" %>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*, java.math.BigDecimal" %>
 <jsp:useBean id="prod" class="product.productBean" />
 
 <%
+request.setCharacterEncoding("UTF-8");
 Integer userId     = (Integer) session.getAttribute("userId");
 String newProduct  = request.getParameter("productName");
 String prodCode    = request.getParameter("productCode"); // Changed from prodCode to productCode
@@ -49,6 +50,10 @@ String hsn         = request.getParameter("hsn");
 if (hsn != null && hsn.trim().isEmpty()) {
     hsn = null;
 }
+String tamilName = request.getParameter("tamilName");
+if (tamilName != null && tamilName.trim().isEmpty()) {
+    tamilName = null;
+}
 
 // In edit mode UI, cost/mrp are shown in selected unit when conversion exists.
 // Convert them back to base values before saving.
@@ -81,7 +86,7 @@ try {
     }*/
 
     prod.editProduct(productId, newProduct, prodCode, categoryId, brandId,
-                     mrp, cost, discValue, discType, gst, userId, unitId, hsn, commission);
+                     mrp, cost, discValue, discType, gst, userId, unitId, hsn, commission, tamilName);
 
     response.sendRedirect(request.getContextPath() + "/product/master/product/product.jsp?msg=Object+updated+successfully!&type=success");
 

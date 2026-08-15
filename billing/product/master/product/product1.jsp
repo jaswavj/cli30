@@ -1,7 +1,8 @@
-<%@page language="java" import="java.util.*, java.math.BigDecimal" %>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*, java.math.BigDecimal" %>
 <jsp:useBean id="prod" class="product.productBean" />
 
 <%
+request.setCharacterEncoding("UTF-8");
 Integer userId = (Integer) session.getAttribute("userId");
 String productName = request.getParameter("productName");
 String categoryId = request.getParameter("categoryId");
@@ -14,6 +15,10 @@ int unitId = Integer.parseInt(request.getParameter("unitId"));
 String hsn = request.getParameter("hsn");
 if (hsn != null && hsn.trim().isEmpty()) {
     hsn = null;
+}
+String tamilName = request.getParameter("tamilName");
+if (tamilName != null && tamilName.trim().isEmpty()) {
+    tamilName = null;
 }
 double cost = Double.parseDouble(request.getParameter("cost"));
 double mrp = Double.parseDouble(request.getParameter("mrp"));
@@ -80,7 +85,8 @@ try {
         gst,
         unitId,
         hsn,
-        commission
+        commission,
+        tamilName
     );
 
     response.sendRedirect(request.getContextPath() + "/product/master/product/product.jsp?msg=Product+added+successfully!&type=success");
