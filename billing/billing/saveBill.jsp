@@ -29,12 +29,8 @@ try {
         customerId = Integer.parseInt(customerIdStr);
     }
 
-    // Get commission eligibility for new customer creation
+    // Commission UI removed — always store default 0
     int isEligibleForCommission = 0;
-    String isEligibleCommStr = request.getParameter("isEligibleForCommission");
-    if (isEligibleCommStr != null && !isEligibleCommStr.trim().isEmpty()) {
-        isEligibleForCommission = Integer.parseInt(isEligibleCommStr);
-    }
     
     // If customer name is provided and not "-", handle customer logic
     if (customerName != null && !customerName.equals("-") && !customerName.trim().isEmpty()) {
@@ -160,7 +156,7 @@ try {
         double discount = p.getDouble("discount");
         double total = p.getDouble("total");
         int batchId = p.getInt("batchId");
-        double commission = p.has("commission") ? p.getDouble("commission") : 0.0;
+        double commission = 0.0;
         
         // Get product GST, but set to 0 if not a tax bill
         int gst = isTaxBill == 1 ? bill.getProductGST(productId) : 0;

@@ -200,12 +200,16 @@ int userDiscPer = (uid != null) ? userBn.getUserDiscPer(uid) : 100;
         .btbl thead {
             display: block;
             flex-shrink: 0;
+            width: 100%;
+            scrollbar-gutter: stable;
         }
 
         .btbl tbody {
             display: block;
             flex: 1;
             overflow-y: auto;
+            width: 100%;
+            scrollbar-gutter: stable;
         }
 
         .btbl thead tr,
@@ -214,6 +218,21 @@ int userDiscPer = (uid != null) ? userBn.getUserDiscPer(uid) : 100;
             width: 100%;
             table-layout: fixed;
         }
+
+        .btbl th,
+        .btbl td {
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .btbl th:nth-child(1), .btbl td:nth-child(1) { width: 5%; }
+        .btbl th:nth-child(2), .btbl td:nth-child(2) { width: 10%; }
+        .btbl th:nth-child(3), .btbl td:nth-child(3) { width: 24%; }
+        .btbl th:nth-child(4), .btbl td:nth-child(4) { width: 10%; }
+        .btbl th:nth-child(5), .btbl td:nth-child(5) { width: 12%; }
+        .btbl th:nth-child(6), .btbl td:nth-child(6) { width: 16%; }
+        .btbl th:nth-child(7), .btbl td:nth-child(7) { width: 12%; }
+        .btbl th:nth-child(8), .btbl td:nth-child(8) { width: 11%; }
 
         .btbl thead th {
             padding: 8px 7px;
@@ -257,6 +276,8 @@ int userDiscPer = (uid != null) ? userBn.getUserDiscPer(uid) : 100;
             display: flex;
             gap: 3px;
             align-items: center;
+            min-width: 0;
+            width: 100%;
         }
 
         .disc-type-sel {
@@ -434,10 +455,6 @@ int userDiscPer = (uid != null) ? userBn.getUserDiscPer(uid) : 100;
                 <input class="form-check-input" type="checkbox" id="isTaxBill" checked>
                 <span class="tog-lbl"><i class="fa-solid fa-receipt"></i> Tax Bill</span>
             </label>
-            <label class="tog">
-                <input class="form-check-input" type="checkbox" id="isCommission">
-                <span class="tog-lbl"><i class="fa-solid fa-percent"></i> Commission</span>
-            </label>
             <button class="bb bb-outline" data-bs-toggle="modal" data-bs-target="#quotationListModal">
                 <i class="fa-solid fa-clock"></i> HOLD LIST
             </button>
@@ -499,15 +516,14 @@ int userDiscPer = (uid != null) ? userBn.getUserDiscPer(uid) : 100;
         <table class="btbl">
             <thead>
                 <tr>
-                    <th style="width:5%;">#</th>
-                    <th style="width:10%;">Code</th>
-                    <th style="width:23%;">Item Name</th>
-                    <th style="width:8%;">Qty</th>
-                    <th style="width:10%;">Price</th>
-                    <th style="width:10%;">Discount</th>
-                    <th style="width:10%;">Commission</th>
-                    <th style="width:10%;">Total</th>
-                    <th style="width:14%;">Action</th>
+                    <th>#</th>
+                    <th>Code</th>
+                    <th>Item Name</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>Total</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="billBody">
@@ -530,10 +546,6 @@ int userDiscPer = (uid != null) ? userBn.getUserDiscPer(uid) : 100;
                 <div class="fg">
                     <span class="fg-lbl">Discount</span>
                     <input type="text" class="fg-inp amt only-numbers" id="discountTotal" value="0" readonly>
-                </div>
-                <div class="fg">
-                    <span class="fg-lbl">Commission</span>
-                    <input type="text" class="fg-inp amt only-numbers" id="commissionTotal" value="0" readonly>
                 </div>
                 <div class="fg">
                     <span class="fg-lbl">Grand Total</span>
@@ -733,7 +745,7 @@ int userDiscPer = (uid != null) ? userBn.getUserDiscPer(uid) : 100;
     var userMaxDiscPer = <%=userDiscPer%>;
 </script>
 <script src="bluetoothPrinter.js"></script>
-<script src="billing.js"></script>
+<script src="billing.js?v=20260816"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     // Focus product search input on load
